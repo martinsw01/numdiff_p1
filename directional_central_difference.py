@@ -3,11 +3,13 @@ import numpy as np
 
 def central_difference_matrix(d, M):
     """
-
+    Write a function that returns the matrix of the central difference
+    
     :param d: direction (x, y), tuple of integers
     :param M: horizontal and vertical grid points
     :return:
     """
+    dummy_test = 0
 
     x, y = d
 
