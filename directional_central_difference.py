@@ -43,4 +43,3 @@ def test_along_x_axis():
 if __name__ == '__main__':
     test_along_x_axis()
 
-#penis
