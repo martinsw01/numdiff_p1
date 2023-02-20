@@ -4,7 +4,7 @@ import numpy as np
 from directional_central_difference import central_difference_matrix
 
 
-def boundary_conditions(g, M, x, y):
+def boundary_conditions(g, a, M, x, y):
     """
 
     Add g to rhs
@@ -18,8 +18,8 @@ def boundary_conditions(g, M, x, y):
     rhs = np.zeros((M-1, M-1))
 
     rhs[0, 1:-1] = g0(x[1:M-2])  # Bottom
-    rhs[:, 0] = g1(y[1:M]) + g1(y[:M-1])  # Left
-    rhs[:, -1] = g2(y[1:M]) + g2(y[2:])  # Right
+    rhs[:, 0] = a*g1(y[1:M]) + g1(y[:M-1])  # Left
+    rhs[:, -1] = a*g2(y[1:M]) + g2(y[2:])  # Right
     rhs[-1, 1:-1] = g3(x[3:-1])  # Top
 
     # rhs[:M-1] += g0(x[:M-1])
@@ -44,7 +44,7 @@ def solve(a, d, g, f, M):
 
     A = - a*central_difference_matrix(M, d[0])/h**2-central_difference_matrix(M, d[1])/h**2
     rhs = f(X, Y).reshape((M-1)**2)
-    rhs += boundary_conditions(g, M, x, y)/h**2
+    rhs += boundary_conditions(g, a, M, x, y)/h**2
 
     u = np.linalg.solve(A, rhs).reshape((M-1, M-1))
 
