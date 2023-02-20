@@ -38,9 +38,9 @@ def main():
     f = rhs(2, a)
     X, Y, u = solve(a, d, g, f, M)
 
-    _, (ax1, ax2) = subplots_3d(2)
-    plot_solution(ax1, X, Y, u)
-    plot_solution(ax2, X, Y, T(X, Y)).show()
+    _, (ax1, ax2) = subplots_3d(ncols=2)
+    plot_solution(X, Y, u, ax1)
+    plot_solution(X, Y, T(X, Y), ax2).show()
 
 
 if __name__ == '__main__':
