@@ -17,3 +17,16 @@ def plot_solution(X, Y, u, ax=None, txt='Solution'):
     plt.ylabel('y')
     plt.title(txt)
     return plt
+
+
+def loglogplot_error(h, e, ax=None):
+
+    if ax is None:
+        _, ax = plt.subplots()
+
+    ax.loglog(h, e)
+    ax.set_xlabel("h")
+    ax.set_ylabel("e")
+    ax.invert_xaxis()
+    return plt
+
