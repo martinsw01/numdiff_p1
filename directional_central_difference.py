@@ -5,7 +5,7 @@ import numpy as np
 def central_difference_matrix(M, d):
     """
     :param M: number of grid points along the axes
-    :param d: directon
+    :param d: direction
     :return: Central difference matrix approximating twice derivative along d
     """
 
