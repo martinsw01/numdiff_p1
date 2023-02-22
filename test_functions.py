@@ -56,3 +56,10 @@ class Test3(TestFunction):
         return np.full_like(x, self.r**2)
 
 
+class Test4(TestFunction):
+
+    def T(self, x, y):
+        return np.sin(0.5*np.pi*y)
+
+    def f(self, x, y):
+        return 1 / 4 *self.r**2* np.pi**2 *np.sin(1 / 2 *np.pi* y)
