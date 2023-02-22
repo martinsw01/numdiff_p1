@@ -15,9 +15,9 @@ def main():
     T, f = Test3(r, a)
     g = boundaries(T)
 
-    M = [int(2**i) for i in np.linspace(3, 6.4, 10)]
-    h = np.empty_like(M, dtype=float)
-    e = np.empty_like(M, dtype=float)
+    M = np.logspace(1, 2, 10, dtype=int)
+    h = 1/M
+    e = np.empty_like(h)
 
     for i in range(len(M)):
         X, Y, u = solve(a, d, g, f, M[i])
@@ -25,7 +25,8 @@ def main():
         e[i] = np.max(np.abs(u-T(X, Y)))
 
     loglogplot_error(h, e).show()
-    print(np.polyfit(np.log(h), np.log(e), 1)[0])
+    degree = np.polyfit(np.log(h), np.log(e), 1)[0]
+    print(f"d={degree}")
 
 
 if __name__ == '__main__':
