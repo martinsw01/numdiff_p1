@@ -24,5 +24,5 @@ def central_difference_matrix(M, d):
 
 
 if __name__ == '__main__':
-    plt.pcolormesh(central_difference_matrix(5, 5))
+    plt.pcolormesh(central_difference_matrix(10, (5,3)))
     plt.show()
