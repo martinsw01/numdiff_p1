@@ -63,3 +63,21 @@ class Test4(TestFunction):
 
     def f(self, x, y):
         return 1 / 4 *self.r**2* np.pi**2 *np.sin(1 / 2 *np.pi* y)
+
+
+# Boundry for general domain
+
+def general_boundries(T):
+    def g0(x):  # Bottom
+        return T(x, 0)
+
+    def g1(y):  # Left
+        return T(0, y)
+
+    def g2(y):  # Right
+        return T(np.sqrt(1-y), y)
+
+    def g3(x):  # Top
+        return T(x, 1-x**2)
+
+    return g0, g1, g2, g3
