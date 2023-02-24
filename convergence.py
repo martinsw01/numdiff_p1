@@ -25,8 +25,6 @@ def main():
         e[i] = np.max(np.abs(u-T(X, Y)))
 
     loglogplot_error(h, e).show()
-    degree = np.polyfit(np.log(h), np.log(e), 1)[0]
-    print(f"d={degree}")
 
 
 if __name__ == '__main__':
