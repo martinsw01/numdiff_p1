@@ -74,10 +74,7 @@ def general_boundries(T):
     def g1(y):  # Left
         return T(0, y)
 
-    def g2(y):  # Right
-        return T(np.sqrt(1-y), y)
-
-    def g3(x):  # Top
+    def g2(x):  # Top
         return T(x, 1-x**2)
 
-    return g0, g1, g2, g3
+    return g0, g1, g2
