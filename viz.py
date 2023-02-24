@@ -1,3 +1,4 @@
+import numpy as np
 from matplotlib import cm, pyplot as plt
 
 
@@ -6,7 +7,7 @@ def subplots_3d(nrows=1, ncols=1, **fig_kw):
 
 
 def plot_solution(X, Y, u, ax=None, txt='Solution'):
-    # Plot the solution of the heat equation
+    # Plot the solution of the stationary heat equation
 
     if ax is None:
         _, ax = subplots_3d()
@@ -24,9 +25,13 @@ def loglogplot_error(h, e, ax=None):
     if ax is None:
         _, ax = plt.subplots()
 
-    ax.loglog(h, e)
+    p = np.polyfit(np.log(h), np.log(e), 1)[0]
+
+    ax.set_title("Error")
+    ax.loglog(h, e, label=f"p={p:.3f}")
     ax.set_xlabel("h")
     ax.set_ylabel("e")
     ax.invert_xaxis()
+    plt.legend()
     return plt
 
