@@ -25,8 +25,14 @@ def solve(a, d, g, f, M):
 
     X, Y = np.meshgrid(x[1:-1], y[1:-1])
 
-    A = central_difference_matrix_irregular_bndry()    
-    
+    # Find the number of interior points at each y
+    endpoint_at_row = np.zeros(M-1, dtype=np.int64)
+    for i, x in enumerate(x[1:-1]):
+        n = (np.sqrt(1-x) - np.sqrt(1-x)%h)/h
+        endpoint_at_row[i] = n if n*h != np.sqrt(1-x) else n - 1
+
+    A = central_difference_matrix_irregular_bndry(endpoint_at_row)    
+
     # d1, d2 = d
     # A = - a*central_difference_matrix(M, d1)/h**2-central_difference_matrix(M, d2)/h**2
     # rhs = f(X, Y).reshape((M-1)**2)
@@ -34,6 +40,6 @@ def solve(a, d, g, f, M):
 
     # u = np.linalg.solve(A, rhs).reshape((M-1, M-1))
 
+    u = A # PLACEHOLDER
     return X, Y, u
-
     
