@@ -24,5 +24,11 @@ def get_projection_point(p: tuple):
     r = sol[0]
     return (r, 1-r**2)
 
-print(get_projection_point((0.6, 1)))
-
+def unpack_interior_nodes(vec, end_pts):
+    '''
+    Unpacks a 1D vector to a 2D meshgrid
+    :param vec: 1d vector contianing values
+    :param end_pts: array containint indexes of each rows rightmost interior point
+    :return: 2d array of vec's values (0 where vec is not defined)
+    '''
+    pass
