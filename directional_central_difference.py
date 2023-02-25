@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def central_difference_matrix(M, d):
+def central_difference_matrix(M, N, d):
     """
-    :param M: number of grid points along the axes
+    :param M: number of grid points along the x-axis
+    :param N: number of grid points along the y-axis
     :param d: direction
     :return: Central difference matrix approximating twice derivative along d
     """
@@ -13,11 +14,11 @@ def central_difference_matrix(M, d):
 
     offset = (M-1) * y + x
 
-    N = (M - 1) ** 2
-    A = -2 * np.eye(N)
+    A = -2 * np.eye((N-1)*(M-1))
 
-    off_diag = np.ones(N - offset)
-    off_diag[M-2::M-1] = 0
+    off_diag = np.ones((N-1)*(M-1)-offset)
+    if x:
+        off_diag[M-2::M-1] = 0
     A += np.diag(off_diag, k=offset) + np.diag(off_diag, k=-offset)
 
     return A
