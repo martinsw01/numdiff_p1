@@ -1,7 +1,8 @@
 import numpy as np
 from directional_central_difference import central_difference_matrix_irregular_bndry
+from utilities import get_projection_point, pack_interior_nodes, unpack_interior_nodes
 
-def boundary_conditions(g, a, end_pts, x_grid, y_grid):
+def boundry_conditions(g, end_pts, x_grid, y_grid):
     """
 
     Adjust rhs wrt boundary
@@ -9,7 +10,7 @@ def boundary_conditions(g, a, end_pts, x_grid, y_grid):
     :param g: g=(g0, g1, g2) tuple of functions defined on the boundary
     :param endpoints: array containing rightmost interior endpoint index 
     :param x_grid: array from 0 to 1 of size M+1
-    :param y_grid: array from 0 to 1 of size M+2
+    :param y_grid: array from 0 to 1 of size M+1
     :return: adjustments to the rhs for elements close to the boundary
     """
     g0, g1, g2 = g
@@ -34,25 +35,39 @@ def boundary_conditions(g, a, end_pts, x_grid, y_grid):
         # Iterate over the rightmost points with boundry above
         m = np.diff(end_pts)[i] - np.diff(end_pts)[i+1]
         for i, xi in enumerate(x_grid[len(block) - m: len(block)]):
-            block[-m + i] = g2(xi, y_grid[i+1])
+            block[-m + i] = g2( get_projection_point((xi, y_grid[i+1]))[0] )
         
         rhs[n:end_pts[i+1]] = block
 
     return rhs
 
 
-def solve(a, d, g, f, M):
+def get_rhs(f, g, end_pts, x_grid, y_grid):
+    '''
+    Create the rhs b-vector containing boundry conditions and rhs analytic.
+    '''
+    N = end_pts[-1]
+    rhs = np.zeros(N)
+
+    rhs += boundry_conditions(g, end_pts, x_grid, y_grid)
+
+    X, Y = np.meshgrid(x_grid[1:-1], y_grid[1:-1])
+    rhs += pack_interior_nodes(f(X, Y), end_pts)
+
+    return rhs
+    
+def solve(a, g, f, M):
     """
-    :param d: tuple of vectors (d1, d2) specifying the direction of the heat flows
     :param g: g=(g0, g1, g2, g3) tuple of functions defined on the boundary
     :param f: rhs of the analytic equation
     :return: meshgrid (X, Y) and numeric solution u on the interior
     """
-    x, h = np.linspace(0, 1, M+1, retstep=True)
-    y, k = np.copy(x, h)
+    x_grid, h = np.linspace(0, 1, M+1, retstep=True)
+    y_grid, k = np.linspace(0, 1, M+1, retstep=True)
+    X, Y = np.meshgrid(x_grid[1:-1], y_grid[1:-1])
 
-    X, Y = np.meshgrid(x[1:-1], y[1:-1])
 
+    # TODO: create a separate function perfoming this tast vvvvvv
     # Find the number of interior points at each y
     endpoint_at_row = np.zeros(M-1, dtype=np.int64)
     for i, x in enumerate(x[1:-1]):
@@ -60,15 +75,10 @@ def solve(a, d, g, f, M):
         endpoint_at_row[i] = endpoint_at_row[i-1]
         endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n - 1
 
-    A = central_difference_matrix_irregular_bndry(endpoint_at_row)
+    A = central_difference_matrix_irregular_bndry(endpoint_at_row) / h**2
+    rhs = get_rhs(f, g, endpoint_at_row, x_grid, y_grid)
 
-    # d1, d2 = d
-    # A = - a*central_difference_matrix(M, d1)/h**2-central_difference_matrix(M, d2)/h**2
-    # rhs = f(X, Y).reshape((M-1)**2)
-    # rhs += boundary_conditions(g, a, M, x, y)/h**2
+    u = unpack_interior_nodes(np.linalg.solve(A, rhs), endpoint_at_row)
 
-    # u = np.linalg.solve(A, rhs).reshape((M-1, M-1))
-
-    u = A # PLACEHOLDER
     return X, Y, u
     
