@@ -46,7 +46,7 @@ def central_difference_matrix_irregular_bndry(end_pts):
     end_pts = np.insert(end_pts, 0, 0) # Prepend 0
 
     # Iterate "blocks" down A
-    for i, n in enumerate(end_pts[:-1]):
+    for i, _ in enumerate(end_pts[:-1]):
         range_i = np.arange(end_pts[i], end_pts[i+1])
 
         # Left-offset block
