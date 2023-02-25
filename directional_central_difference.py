@@ -93,7 +93,6 @@ def test_irregular_matrix():
 if __name__ == '__main__':
     for d in [(1, 0), (0, 1), (1, 1)]:
         plt.subplots()
-        problem2_modified_discretization
         plt.pcolormesh(np.flip(central_difference_matrix(5, d), axis=0))
         plt.title(d)
     plt.show()
