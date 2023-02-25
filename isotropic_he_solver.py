@@ -34,7 +34,7 @@ def boundary_conditions(g, a, end_pts, x_grid, y_grid):
         # Iterate over the rightmost points with boundry above
         m = np.diff(end_pts)[i] - np.diff(end_pts)[i+1]
         for i, xi in enumerate(x_grid[len(block) - m: len(block)]):
-            block[-m + i] = g2(xi)
+            block[-m + i] = g2(xi, y_grid[i+1])
         
         rhs[n:end_pts[i+1]] = block
 
