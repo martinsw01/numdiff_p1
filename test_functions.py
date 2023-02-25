@@ -2,7 +2,7 @@ import numpy as np
 
 
 class TestFunction:
-    def __init__(self, r, a):
+    def __init__(self, r=0, a=0):
         self.r = r
         self.a = a
 
@@ -63,6 +63,12 @@ class Test4(TestFunction):
 
     def f(self, x, y):
         return 1 / 4 *self.r**2* np.pi**2 *np.sin(1 / 2 *np.pi* y)
+
+class Test5(TestFunction):
+    def T(self, x, y):
+        return np.sin(3*np.pi*x) + 0.5*np.sin(3*np.pi*y)
+    def f(self, x, y):
+        return -9*np.pi**2*np.sin(3*np.pi*x) - 0.5*9*np.pi**2*np.sin(3*np.pi*y)
 
 
 # Boundry for general domain
