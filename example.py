@@ -16,7 +16,7 @@ def main():
 
     T, f = Test3(r, a)
     g = boundaries(T)
-    X, Y, u = solve(a, d, g, f, M)
+    X, Y, u = solve(a, d, g, f, r, M)
 
     _, (ax1, ax2) = subplots_3d(ncols=2)
     plot_solution(X, Y, u, ax1)
