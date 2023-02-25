@@ -32,3 +32,12 @@ def unpack_interior_nodes(vec, end_pts):
     :return: 2d array of vec's values (0 where vec is not defined)
     '''
     pass
+def pack_interior_nodes(grid, end_pts):
+    '''
+    Packs a 2d grid into a 1d vector, only keeping end_pts[i] nodes
+    at row i.
+    :param grid: 2d array containing values on a grid
+    :param end_pts: array containint indexes of each rows rightmost interior point
+    :return: 1d array of interior nodes on the grid
+    '''
+    pass
