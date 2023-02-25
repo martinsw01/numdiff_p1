@@ -6,7 +6,7 @@ def boundary_conditions(g, a, M, x, y):
 
     Adjust rhs wrt boundary
 
-    :param g: g=(g0, g1, g2, g3) tuple of functions defined on the boundary
+    :param g: g=(g0, g1, g2) tuple of functions defined on the boundary
     :param x: array from 0 to 1 of size M+1
     :param y: array from 0 to 2 of size M+2
     :return: adjustments to the rhs for elements close to the boundary
@@ -29,7 +29,8 @@ def solve(a, d, g, f, M):
     endpoint_at_row = np.zeros(M-1, dtype=np.int64)
     for i, x in enumerate(x[1:-1]):
         n = (np.sqrt(1-x) - np.sqrt(1-x)%h)/h
-        endpoint_at_row[i] = n if n*h != np.sqrt(1-x) else n - 1
+        endpoint_at_row[i] = endpoint_at_row[i-1]
+        endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n - 1
 
     A = central_difference_matrix_irregular_bndry(endpoint_at_row)    
 
