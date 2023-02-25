@@ -56,7 +56,7 @@ def get_rhs(f, g, end_pts, x_grid, y_grid):
 
     return rhs
     
-def solve(a, g, f, M):
+def solve(g, f, M):
     """
     :param g: g=(g0, g1, g2, g3) tuple of functions defined on the boundary
     :param f: rhs of the analytic equation
@@ -70,7 +70,7 @@ def solve(a, g, f, M):
     # TODO: create a separate function perfoming this tast vvvvvv
     # Find the number of interior points at each y
     endpoint_at_row = np.zeros(M-1, dtype=np.int64)
-    for i, x in enumerate(x[1:-1]):
+    for i, x in enumerate(x_grid[1:-1]):
         n = (np.sqrt(1-x) - np.sqrt(1-x)%h)/h
         endpoint_at_row[i] = endpoint_at_row[i-1]
         endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n - 1
