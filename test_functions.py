@@ -66,9 +66,9 @@ class Test4(TestFunction):
 
 class Test5(TestFunction):
     def T(self, x, y):
-        return np.sin(3*np.pi*x) + 0.5*np.sin(3*np.pi*y)
+        return np.sin(3*np.pi*x) + np.sin(3*np.pi*y)
     def f(self, x, y):
-        return -9*np.pi**2*np.sin(3*np.pi*x) - 0.5*9*np.pi**2*np.sin(3*np.pi*y)
+        return -9*np.pi**2*np.sin(3*np.pi*x) - 9*np.pi**2*np.sin(3*np.pi*y)
 
 
 # Boundry for general domain
