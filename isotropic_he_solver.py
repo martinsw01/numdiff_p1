@@ -33,9 +33,9 @@ def boundry_conditions(g, end_pts, x_grid, y_grid):
 
         # Top boundry
         # Iterate over the rightmost points with boundry above
-        m = np.diff(end_pts)[i] - np.diff(end_pts)[i+1]
-        for i, xi in enumerate(x_grid[len(block) - m: len(block)]):
-            block[-m + i] = g2( get_projection_point((xi, y_grid[i+1]))[0] )
+        m = end_pts[i] - end_pts[i+1]
+        for j, xi in enumerate(x_grid[len(block) - m: len(block)]):
+            block[-m + j] = g2( get_projection_point((xi, y_grid[i+1]))[0] )
         
         rhs[n:end_pts[i+1]] = block
 
@@ -51,7 +51,7 @@ def get_rhs(f, g, end_pts, x_grid, y_grid):
 
     rhs += boundry_conditions(g, end_pts, x_grid, y_grid)
 
-    X, Y = np.meshgrid(x_grid[1:-1], y_grid[1:-1])
+    X, Y = np.meshgrid(x_grid, y_grid)
     rhs += pack_interior_nodes(f(X, Y), end_pts)
 
     return rhs
@@ -63,8 +63,8 @@ def solve(g, f, M):
     :return: meshgrid (X, Y) and numeric solution u on the interior
     """
     x_grid, h = np.linspace(0, 1, M+1, retstep=True)
-    y_grid, k = np.linspace(0, 1, M+1, retstep=True)
-    X, Y = np.meshgrid(x_grid[1:-1], y_grid[1:-1])
+    y_grid = np.linspace(0, 1, M+1)
+    X, Y = np.meshgrid(x_grid, y_grid)
 
 
     # TODO: create a separate function perfoming this tast vvvvvv
