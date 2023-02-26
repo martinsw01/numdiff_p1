@@ -37,8 +37,8 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
         raise ValueError("Please add an x- and y-grid to use modified scheme")
     elif kwargs.get("modified_scheme"):
         mod_scheme = True
-        x_grid = kwargs.get(x_grid)
-        y_grid = kwargs.get(y_grid)
+        x_grid = kwargs.get("x_grid")
+        y_grid = kwargs.get("y_grid")
         h = x_grid[1]-x_grid[0]
 
     def B(n, lower_diag=None, diag=None):
@@ -48,11 +48,11 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
         :param lower_diag: n-1 array with values for lower diag
         :param diag: n array with values for diag
         '''
-        upper_diag = np.repeat(1, n-1)
-        if not lower_diag:
+        upper_diag = np.repeat(1.0, n-1)
+        if lower_diag is None:
             lower_diag = np.copy(upper_diag)
-        if not diag:
-            diag = np.repeat(-4, n)
+        if diag is None:
+            diag = np.repeat(-4.0, n)
         return np.diag(lower_diag, -1) + np.diag(diag, 0) + np.diag(upper_diag, 1)
     def I(m, n, vals):
         '''Create an m*n block with vals (can be 1) along the diagonal and 0 else'''
@@ -66,17 +66,18 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
     end_pts = np.insert(end_pts, 0, 0) # Prepend 0
 
     # Iterate "blocks" down A
-    for i, n in enumerate(end_pts[:-1]):
+    for i, _ in enumerate(end_pts[:-1]):
         range_i = np.arange(end_pts[i], end_pts[i+1])
+        n = np.diff(end_pts)[i] # number of interior points at row i
+        m = n - np.diff(end_pts)[i+1] if i < len(end_pts)-2 else 0 # number of righ.pts without interior nodes above
 
         # Left-offset block
         if i > 0:
             if mod_scheme:
-                diag = np.ones(range_i)
+                diag = np.ones(n)
                 
                 # Iterate over rightmost point without interior nodes above
-                m = end_pts[i] - end_pts[i+1]
-                for j, xi in x_grid[n-m:n]:
+                for j, xi in enumerate(x_grid[n-m:n]):
                     diag[-m+j] = innward(eta1(xi, y_grid[i+1], h))
                 left_block = I(np.diff(end_pts)[i], np.diff(end_pts)[i-1], diag)
             else:
@@ -95,18 +96,18 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
 
         # Center/Diagonal block
         if mod_scheme:
-            diag = np.repeat(-4, n)
-            lower_diag = np.repeat(1, n-1)
+            diag = np.repeat(-4.0, n)
+            lower_diag = np.repeat(1.0, n-1)
 
             # Correct for the right boundry
-            eta0_i = eta0(x_grid[n], y_grid[i+1], h)
+            eta0_i = eta0(x_grid[np.diff(end_pts)[i]], y_grid[i+1], h)
             diag[-1]        += 2 - at(eta0_i)
             lower_diag[-1]   = innward(eta0_i)
 
             # Iterate over the rightmost points without interior nodes above, and
             # correct for the upper boundry
-            m = end_pts[i] - end_pts[i+1]
-            for j, xi in x_grid[n-m:n]:
+            # m = n - np.diff(end_pts)[i+1] if i < len(end_pts)-2 else 0
+            for j, xi in enumerate(x_grid[n-m:n]):
                 diag[-m+j] += 2 - innward(eta1(xi, y_grid[i+1], h))
 
             center_block = B(n, lower_diag, diag)
@@ -130,7 +131,7 @@ def at(eta: float) -> float:
     return 2 / eta
 
 def eta0(x: float, y: float, h: float) -> float:
-    '''Finds vertical eta given a spatial point x, y. And stepsize h'''
+    '''Finds horizontal eta given a spatial point x, y. And stepsize h'''
     return (np.sqrt(1-y) - x) / h
 def eta1(x: float, y: float, h: float) -> float:
     '''Finds vertical eta given a spatial point x, y. And stepsize h'''
@@ -147,16 +148,19 @@ def test_irregular_matrix(**kwargs):
     '''
     # Test implementation
     M = 7
-    x, h = np.linspace(0, 1, M+1, retstep=True)
+    x_grid, h = np.linspace(0, 1, M+1, retstep=True)
+    y_grid = np.copy(x_grid)
+    if kwargs.get("modified_scheme"):
+        kwargs["x_grid"] = x_grid
+        kwargs["y_grid"] = y_grid
 
     # Find the number of interior points at each y
     endpoint_at_row = np.zeros(M-1, dtype=np.int64)
-    for i, x in enumerate(x[1:-1]):
+    for i, x in enumerate(x_grid[1:-1]):
         n = (np.sqrt(1-x) - np.sqrt(1-x)%h)/h
         endpoint_at_row[i] = endpoint_at_row[i-1]
         endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n - 1
 
-    # endpoint_at_row = [5, 9, 11]
     A = central_difference_matrix_irregular_bndry(endpoint_at_row, **kwargs)
 
     A = np.flip(A, axis=0)
