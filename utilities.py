@@ -22,7 +22,7 @@ def get_projection_point(p: tuple):
     '''
     r = Symbol('r')
     sol = solve(p[0] + r*(1 - 2*p[1]) - 2*r**3, r)
-    r = sol[0]
+    r = float(sol[0])
     return (r, 1-r**2)
 
 def unpack_interior_nodes(vec, end_pts):

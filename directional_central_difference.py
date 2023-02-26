@@ -33,6 +33,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
     :return: Central difference matrix approximating twice derivative along x and y
                 using the iregular domain
     """
+    mod_scheme = False
     if "modified_scheme" in kwargs and not ("x_grid" and "y_grid" in kwargs):
         raise ValueError("Please add an x- and y-grid to use modified scheme")
     elif kwargs.get("modified_scheme"):
@@ -56,7 +57,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
         return np.diag(lower_diag, -1) + np.diag(diag, 0) + np.diag(upper_diag, 1)
     def I(m, n, vals):
         '''Create an m*n block with vals (can be 1) along the diagonal and 0 else'''
-        A = np.zeros(shape=(m, n)) 
+        A = np.zeros(shape=(m, n))
         np.fill_diagonal(A, vals)
         return A
     
@@ -75,7 +76,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
         if i > 0:
             if mod_scheme:
                 diag = np.ones(n)
-                
+
                 # Iterate over rightmost point without interior nodes above
                 for j, xi in enumerate(x_grid[n-m:n]):
                     diag[-m+j] = innward(eta1(xi, y_grid[i+1], h))

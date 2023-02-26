@@ -13,8 +13,8 @@ def main():
     X, Y, u = solve(g, f, M)
 
     _, (ax1, ax2) = subplots_3d(ncols=2)
-    plot_solution(X, Y, u, ax1)
-    plot_solution(X, Y, T(X, Y), ax2).show()
+    plot_solution(X[1:-1, 1:-1], Y[1:-1, 1:-1], u[1:-1, 1:-1], ax1)
+    plot_solution(X[1:-1, 1:-1], Y[1:-1, 1:-1], T(X, Y)[1:-1, 1:-1], ax2).show()
 
 
 if __name__ == '__main__':

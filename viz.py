@@ -14,9 +14,9 @@ def plot_solution(X, Y, u, ax=None, txt='Solution'):
 
     ax.plot_surface(X, Y, u, cmap=cm.coolwarm)
     ax.view_init(azim=30)  # Rotate the figure
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title(txt)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(txt)
     return plt
 
 
