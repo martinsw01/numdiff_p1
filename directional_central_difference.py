@@ -46,7 +46,7 @@ def central_difference_matrix_irregular_bndry(end_pts):
     end_pts = np.insert(end_pts, 0, 0) # Prepend 0
 
     # Iterate "blocks" down A
-    for i, n in enumerate(end_pts[:-1]):
+    for i, _ in enumerate(end_pts[:-1]):
         range_i = np.arange(end_pts[i], end_pts[i+1])
 
         # Left-offset block
@@ -91,10 +91,10 @@ def test_irregular_matrix():
     plt.show()
 
 if __name__ == '__main__':
-    for d in [(1, 0), (0, 1), (1, 1)]:
-        plt.subplots()
-        plt.pcolormesh(np.flip(central_difference_matrix(5, d), axis=0))
-        plt.title(d)
-    plt.show()
+    # for d in [(1, 0), (0, 1), (1, 1)]:
+    #     plt.subplots()
+    #     plt.pcolormesh(np.flip(central_difference_matrix(5, d), axis=0))
+    #     plt.title(d)
+    # plt.show()
 
     test_irregular_matrix()
