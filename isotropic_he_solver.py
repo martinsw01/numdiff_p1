@@ -104,7 +104,7 @@ def solve(g, f, M, **kwargs):
         endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n-1
 
     A = central_difference_matrix_irregular_bndry(endpoint_at_row, **kwargs)/h**2
-    rhs = get_rhs(f, g, endpoint_at_row, x_grid, y_grid)
+    rhs = get_rhs(f, g, endpoint_at_row, **kwargs)
 
     u = unpack_interior_nodes(np.linalg.solve(A, rhs), endpoint_at_row)
 
