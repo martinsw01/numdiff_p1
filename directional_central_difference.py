@@ -95,8 +95,21 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
 
         # Center/Diagonal block
         if mod_scheme:
-            # center_block = B(n, lower_diag, diag)
-            pass
+            diag = np.repeat(-4, n)
+            lower_diag = np.repeat(1, n-1)
+
+            # Correct for the right boundry
+            eta0_i = eta0(x_grid[n], y_grid[i+1], h)
+            diag[-1]        += 2 - at(eta0_i)
+            lower_diag[-1]   = innward(eta0_i)
+
+            # Iterate over the rightmost points without interior nodes above, and
+            # correct for the upper boundry
+            m = end_pts[i] - end_pts[i+1]
+            for j, xi in x_grid[n-m:n]:
+                diag[-m+j] += 2 - innward(eta1(xi, y_grid[i+1], h))
+
+            center_block = B(n, lower_diag, diag)
         else:
             center_block = B(n)
         A[
