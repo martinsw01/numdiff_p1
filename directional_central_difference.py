@@ -36,19 +36,28 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
     if "modified_scheme" in kwargs and not ("x_grid" and "y_grid" in kwargs):
         raise ValueError("Please add an x- and y-grid to use modified scheme")
     elif kwargs.get("modified_scheme"):
+        mod_scheme = True
         x_grid = kwargs.get(x_grid)
         y_grid = kwargs.get(y_grid)
         h = x_grid[1]-x_grid[0]
 
-    def B(n):
-        '''Create a tridiag(1, -4, 1) block'''
-        off_diag = np.repeat(1, n-1)
-        diag = np.repeat(-4, n)
-        return np.diag(off_diag, -1) + np.diag(diag, 0) + np.diag(off_diag, 1)
+    def B(n, lower_diag=None, diag=None):
+        '''
+        Create a tridiag(lower_diag, diag, 1) block.
+        :param n: dimention of block
+        :param lower_diag: n-1 array with values for lower diag
+        :param diag: n array with values for diag
+        '''
+        upper_diag = np.repeat(1, n-1)
+        if not lower_diag:
+            lower_diag = np.copy(upper_diag)
+        if not diag:
+            diag = np.repeat(-4, n)
+        return np.diag(lower_diag, -1) + np.diag(diag, 0) + np.diag(upper_diag, 1)
     def I(m, n, vals):
         '''Create an m*n block with vals (can be 1) along the diagonal and 0 else'''
         A = np.zeros(shape=(m, n)) 
-        np.fill_diagonal(A, 1)
+        np.fill_diagonal(A, vals)
         return A
     
 
@@ -62,17 +71,16 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
 
         # Left-offset block
         if i > 0:
-            if kwargs.get("modified_scheme"):
+            if mod_scheme:
                 diag = np.ones(range_i)
                 
                 # Iterate over rightmost point without interior nodes above
                 m = end_pts[i] - end_pts[i+1]
                 for j, xi in x_grid[n-m:n]:
                     diag[-m+j] = innward(eta1(xi, y_grid[i+1], h))
-                pass
+                left_block = I(np.diff(end_pts)[i], np.diff(end_pts)[i-1], diag)
             else:
                 left_block = I(np.diff(end_pts)[i], np.diff(end_pts)[i-1], 1)
-
             A[
                 range_i,
                 end_pts[i-1]:end_pts[i]
@@ -86,10 +94,15 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
             ] = I(np.diff(end_pts)[i], np.diff(end_pts)[i+1], 1)
 
         # Center/Diagonal block
+        if mod_scheme:
+            # center_block = B(n, lower_diag, diag)
+            pass
+        else:
+            center_block = B(n)
         A[
             range_i,
             end_pts[i]:end_pts[i+1]
-        ] = B(np.diff(end_pts)[i])
+        ] = center_block
 
     return A
 
