@@ -34,13 +34,13 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
                 using the iregular domain
     """
     mod_scheme = False
-    if "modified_scheme" in kwargs and not ("x_grid" and "y_grid" in kwargs):
-        raise ValueError("Please add an x- and y-grid to use modified scheme")
+    if "modified_scheme" in kwargs and not ("x_grid" and "y_grid" and "h"in kwargs):
+        raise ValueError("Please add x-, y-grid and h to use modified scheme")
     elif kwargs.get("modified_scheme"):
         mod_scheme = True
         x_grid = kwargs.get("x_grid")
         y_grid = kwargs.get("y_grid")
-        h = x_grid[1]-x_grid[0]
+        h = kwargs.get("h")
 
     def B(n, lower_diag=None, diag=None):
         '''
