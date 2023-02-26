@@ -1,9 +1,9 @@
 import numpy as np
-from directional_central_difference import central_difference_matrix_irregular_bndry
+from directional_central_difference import central_difference_matrix_irregular_bndry, eta0, eta1, outward
 from utilities import get_projection_point, pack_interior_nodes, unpack_interior_nodes
 
 
-def boundry_conditions(g, end_pts, x_grid, y_grid):
+def boundry_conditions(g, end_pts, x_grid, y_grid, **kwargs):
     """
 
     Adjust rhs wrt boundary
@@ -14,6 +14,18 @@ def boundry_conditions(g, end_pts, x_grid, y_grid):
     :param y_grid: array from 0 to 1 of size M+1
     :return: adjustments to the rhs for elements close to the boundary
     """
+    mod_scheme = False
+    if kwargs.get("modified_scheme"):
+        mod_scheme = True
+        h = kwargs.get("h")
+
+    def bndry_at_y(y):
+        '''Given a y, return the tuple coordinate of boundry'''
+        return (np.sqrt(1-y), y)
+    def bndry_at_x(x):
+        '''Given a y, return the tuple coordinate of boundry'''
+        return (x, 1-x**2)
+
     g0, g1, g2 = g
 
     N = end_pts[-1]
@@ -23,6 +35,7 @@ def boundry_conditions(g, end_pts, x_grid, y_grid):
     # Create rhs by iterating over sections/blocks
     for i, n in enumerate(end_pts[:-1]):
         block = np.zeros(np.diff(end_pts)[i])
+        y = y_grid[i+1]
 
         # Bottom boundry
         if i == 0:
@@ -30,20 +43,27 @@ def boundry_conditions(g, end_pts, x_grid, y_grid):
 
         # Left and right boundry
         block[0] += g1(y_grid[i+1])
-        block[-1] += g2(x_grid[len(block)+1])
+        if mod_scheme:
+            block[-1] += outward(eta0(*bndry_at_y(y), h)) * g2(bndry_at_y(y)[0])
+        else:
+            block[-1] += g2(x_grid[len(block)+1])
 
         # Top boundry
         # Iterate over the rightmost points with boundry above
         m = np.diff(end_pts)[i]-np.diff(end_pts)[i+1] if i < len(end_pts)-2 else np.diff(end_pts)[-1] # number of righ.pts without interior nodes above
         for j, xi in enumerate(x_grid[len(block)-m: len(block)]):
-            block[-m+j] += g2(get_projection_point((xi, y_grid[i+1]))[0])
+            if mod_scheme:
+                block[-m+j] += outward(eta1(*bndry_at_x(xi), h)) * g2(xi)
+                pass
+            else:
+                block[-m+j] += g2(get_projection_point((xi, y_grid[i+1]))[0])
 
         rhs[n:end_pts[i+1]] = block
 
     return rhs
 
 
-def get_rhs(f, g, end_pts, x_grid, y_grid):
+def get_rhs(f, g, end_pts, x_grid, y_grid, **kwargs):
     '''
     Create the rhs b-vector containing boundry conditions and rhs analytic.
     '''
@@ -52,7 +72,7 @@ def get_rhs(f, g, end_pts, x_grid, y_grid):
 
     h = x_grid[1] - x_grid[0]
 
-    rhs += -boundry_conditions(g, end_pts, x_grid, y_grid)/h**2
+    rhs += -boundry_conditions(g, end_pts, x_grid, y_grid, **kwargs)/h**2
 
     X, Y = np.meshgrid(x_grid, y_grid)
     rhs += pack_interior_nodes(f(X, Y), end_pts)
@@ -60,7 +80,7 @@ def get_rhs(f, g, end_pts, x_grid, y_grid):
     return rhs
 
 
-def solve(g, f, M):
+def solve(g, f, M, **kwargs):
     """
     :param g: g=(g0, g1, g2, g3) tuple of functions defined on the boundary
     :param f: rhs of the analytic equation
@@ -70,6 +90,11 @@ def solve(g, f, M):
     y_grid = np.linspace(0, 1, M+1)
     X, Y = np.meshgrid(x_grid, y_grid)
 
+    if kwargs.get("modified_scheme"):
+        kwargs["x_grid"] = x_grid
+        kwargs["y_grid"] = y_grid
+        kwargs["h"] = h
+
     # TODO: create a separate function perfoming this tast vvvvvv
     # Find the number of interior points at each y
     endpoint_at_row = np.zeros(M-1, dtype=np.int64)
@@ -78,7 +103,7 @@ def solve(g, f, M):
         endpoint_at_row[i] = endpoint_at_row[i-1]
         endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n-1
 
-    A = central_difference_matrix_irregular_bndry(endpoint_at_row)/h**2
+    A = central_difference_matrix_irregular_bndry(endpoint_at_row, **kwargs)/h**2
     rhs = get_rhs(f, g, endpoint_at_row, x_grid, y_grid)
 
     u = unpack_interior_nodes(np.linalg.solve(A, rhs), endpoint_at_row)
