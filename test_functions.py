@@ -70,6 +70,12 @@ class Test5(TestFunction):
     def f(self, x, y):
         return -9*np.pi**2*np.sin(3*np.pi*x) - 9*np.pi**2*np.sin(3*np.pi*y)
 
+class Test6(TestFunction):
+    def T(self, x, y):
+        return x**2 + y**2
+    def f(self, x, y):
+        return 2*x + 2*y
+
 
 # Boundry for general domain
 
