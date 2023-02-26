@@ -51,7 +51,7 @@ def boundry_conditions(g, end_pts, x_grid, y_grid, **kwargs):
         # Top boundry
         # Iterate over the rightmost points with boundry above
         m = np.diff(end_pts)[i]-np.diff(end_pts)[i+1] if i < len(end_pts)-2 else np.diff(end_pts)[-1] # number of righ.pts without interior nodes above
-        for j, xi in enumerate(x_grid[len(block)-m+1: len(block)]):
+        for j, xi in enumerate(x_grid[len(block)-m: len(block)]):
             if mod_scheme:
                 block[-m+j] += outward(eta1(xi, y, h)) * g2(bndry_at_x(xi)[1])
             else:
