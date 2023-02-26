@@ -74,7 +74,7 @@ class Test6(TestFunction):
     def T(self, x, y):
         return x**2 + y**2
     def f(self, x, y):
-        return 2*x + 2*y
+        return 2 + 2*np.ones_like(x)
 
 
 # Boundry for general domain

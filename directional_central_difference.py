@@ -70,7 +70,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
     for i, _ in enumerate(end_pts[:-1]):
         range_i = np.arange(end_pts[i], end_pts[i+1])
         n = np.diff(end_pts)[i] # number of interior points at row i
-        m = n - np.diff(end_pts)[i+1] if i < len(end_pts)-2 else 0 # number of righ.pts without interior nodes above
+        m = n - np.diff(end_pts)[i+1] if i < len(end_pts)-2 else n # number of righ.pts without interior nodes above
 
         # Left-offset block
         if i > 0:
@@ -78,7 +78,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
                 diag = np.ones(n)
 
                 # Iterate over rightmost point without interior nodes above
-                for j, xi in enumerate(x_grid[n-m:n]):
+                for j, xi in enumerate(x_grid[1+n-m:1+n]):
                     diag[-m+j] = innward(eta1(xi, y_grid[i+1], h))
                 left_block = I(np.diff(end_pts)[i], np.diff(end_pts)[i-1], diag)
             else:
@@ -108,7 +108,7 @@ def central_difference_matrix_irregular_bndry(end_pts, **kwargs):
             # Iterate over the rightmost points without interior nodes above, and
             # correct for the upper boundry
             # m = n - np.diff(end_pts)[i+1] if i < len(end_pts)-2 else 0
-            for j, xi in enumerate(x_grid[n-m:n]):
+            for j, xi in enumerate(x_grid[n-m+1:n+1]):
                 diag[-m+j] += 2 - innward(eta1(xi, y_grid[i+1], h))
 
             center_block = B(n, lower_diag, diag)

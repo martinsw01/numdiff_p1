@@ -23,7 +23,7 @@ def boundry_conditions(g, end_pts, x_grid, y_grid, **kwargs):
         '''Given a y, return the tuple coordinate of boundry'''
         return (np.sqrt(1-y), y)
     def bndry_at_x(x):
-        '''Given a y, return the tuple coordinate of boundry'''
+        '''Given a x, return the tuple coordinate of boundry'''
         return (x, 1-x**2)
 
     g0, g1, g2 = g
@@ -44,17 +44,16 @@ def boundry_conditions(g, end_pts, x_grid, y_grid, **kwargs):
         # Left and right boundry
         block[0] += g1(y_grid[i+1])
         if mod_scheme:
-            block[-1] += outward(eta0(*bndry_at_y(y), h)) * g2(bndry_at_y(y)[0])
+            block[-1] += outward(eta0(x_grid[len(block)], y, h)) * g2(bndry_at_y(y)[0])
         else:
             block[-1] += g2(x_grid[len(block)+1])
 
         # Top boundry
         # Iterate over the rightmost points with boundry above
         m = np.diff(end_pts)[i]-np.diff(end_pts)[i+1] if i < len(end_pts)-2 else np.diff(end_pts)[-1] # number of righ.pts without interior nodes above
-        for j, xi in enumerate(x_grid[len(block)-m: len(block)]):
+        for j, xi in enumerate(x_grid[len(block)-m+1: len(block)]):
             if mod_scheme:
-                block[-m+j] += outward(eta1(*bndry_at_x(xi), h)) * g2(xi)
-                pass
+                block[-m+j] += outward(eta1(xi, y, h)) * g2(bndry_at_x(xi)[1])
             else:
                 block[-m+j] += g2(get_projection_point((xi, y_grid[i+1]))[0])
 
@@ -90,22 +89,24 @@ def solve(g, f, M, **kwargs):
     y_grid = np.linspace(0, 1, M+1)
     X, Y = np.meshgrid(x_grid, y_grid)
 
+    kwargs["x_grid"] = x_grid
+    kwargs["y_grid"] = y_grid
     if kwargs.get("modified_scheme"):
-        kwargs["x_grid"] = x_grid
-        kwargs["y_grid"] = y_grid
         kwargs["h"] = h
 
     # TODO: create a separate function perfoming this tast vvvvvv
     # Find the number of interior points at each y
-    endpoint_at_row = np.zeros(M-1, dtype=np.int64)
-    for i, x in enumerate(x_grid[1:-1]):
-        n = (np.sqrt(1-x)-np.sqrt(1-x)%h)/h
-        endpoint_at_row[i] = endpoint_at_row[i-1]
-        endpoint_at_row[i] += n if n*h != np.sqrt(1-x) else n-1
+    end_pts = np.zeros(M-1, dtype=np.int64)
+    for i, y in enumerate(y_grid[1:-1]):
+        # n = (np.sqrt(1-y)-(np.sqrt(1-y))%h)/h
+        # endpoint_at_row[i] = endpoint_at_row[i-1]
+        # endpoint_at_row[i] += n if n*h != np.sqrt(1-y) else n-1
+        end_pts[i] = np.floor(np.sqrt((1-y))/h - 1e-6)
+    end_pts = np.add.accumulate(end_pts)
 
-    A = central_difference_matrix_irregular_bndry(endpoint_at_row, **kwargs)/h**2
-    rhs = get_rhs(f, g, endpoint_at_row, **kwargs)
+    A = central_difference_matrix_irregular_bndry(end_pts, **kwargs)/h**2
+    rhs = get_rhs(f, g, end_pts, **kwargs)
 
-    u = unpack_interior_nodes(np.linalg.solve(A, rhs), endpoint_at_row)
+    u = unpack_interior_nodes(np.linalg.solve(A, rhs), end_pts)
 
     return X, Y, u
